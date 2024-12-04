@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
-import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
   TransactionDetail: {
@@ -15,9 +14,6 @@ type RootStackParamList = {
   };
 };
 
-type TransactionDetailProps = {
-  route: RouteProp<RootStackParamList, 'TransactionDetail'>;
-};
 
 const TransactionDetail = () => {
   const params = useLocalSearchParams();

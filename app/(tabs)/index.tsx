@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Alert, useColorScheme, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useNavigation, useFocusEffect, NavigationProp } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { RefreshControl  } from 'react-native';
 import { useRouter } from 'expo-router';
+import { TextInput } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import transactionData from '@/assets/transactions.json';
 
@@ -14,20 +14,18 @@ type Transaction = {
   type: string;
 };
 
-type RootStackParamList = {
-    TransactionHistory: undefined;
-    TransactionDetail: { transaction: Transaction };
-};
-
 const TransactionHistoryScreen = () => {
     const [authenticated, setAuthenticated] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [transactions, setTransactions] = useState<Transaction[]>(transactionData);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedType, setSelectedType] = useState<string | null>(null);
+    
     const router = useRouter()
 
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-
+   
     const handleError = (error: any, fallbackMessage: string) => {
       const errorMessage = error?.message || fallbackMessage;
       setError(errorMessage);
@@ -72,46 +70,54 @@ const TransactionHistoryScreen = () => {
       });
     };
 
-    useFocusEffect(
-        React.useCallback(() => {
-          const authenticate = async () => {
-            setIsLoading(true);
-            setError(null);
+    const filterTransactions = (data: Transaction[]) => {
+      return data.filter(item => {
+        const matchesSearch = item.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesType = !selectedType || item.type === selectedType;
+        return matchesSearch && matchesType;
+      });
+    };
 
-            try {
-              const hasHardware = await LocalAuthentication.hasHardwareAsync();
-              if (!hasHardware) {
-                throw new Error ('Device does not support biometric authentication');
-              }
+    useEffect(() => {
+      const authenticate = async () => {
+        if (!authenticated) {
+          setIsLoading(true);
+          setError(null);
+
+          try {
+            const hasHardware = await LocalAuthentication.hasHardwareAsync();
+            if (!hasHardware) {
+              throw new Error ('Device does not support biometric authentication');
+            }
     
-              const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-              if (!isEnrolled) {
-                throw new Error('No biometrics registered on this device');
-              }
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+            if (!isEnrolled) {
+              throw new Error('No biometrics registered on this device');
+            }
     
-              const result = await LocalAuthentication.authenticateAsync({
-                promptMessage: 'Authenticate to view transactions',
-                fallbackLabel: 'Use device PIN'
-              });
+            const result = await LocalAuthentication.authenticateAsync({
+              promptMessage: 'Authenticate to view transactions',
+              fallbackLabel: 'Use device PIN'
+            });
     
-              if (result.success) {
-                setAuthenticated(true);
-              } else if (result.error === 'user cancel') {
-                handleError(null, 'Authentication cancelled');
-              } else {
-                throw new Error('Authentication failed');
-              }
-            } catch (error) {
-                handleError(error, 'Authentication error occurred');
-                setAuthenticated(false);
-              } finally {
-                setIsLoading(false);
-              }
-          };
+            if (result.success) {
+              setAuthenticated(true);
+            } else if (result.error === 'user cancel') {
+              handleError(null, 'Authentication cancelled');
+            } else {
+              throw new Error('Authentication failed');
+            }
+          } catch (error) {
+              handleError(error, 'Authentication error occurred');
+              setAuthenticated(false);
+            } finally {
+              setIsLoading(false);
+            }
+          }
+        };
     
-          authenticate();
-        }, [])
-    );
+        authenticate();
+      }, [])
 
   return (
     <View style={styles.container}>
@@ -124,8 +130,31 @@ const TransactionHistoryScreen = () => {
         <Text style={styles.errorText}>{error}</Text>
       </View>
     )}
+    <View style={styles.filterContainer}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search transactions..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        />
+        <View style={styles.filterButtons}>
+        <Text style={styles.filterText}>Filter: </Text>
+          <TouchableOpacity
+            style={[styles.filterButton, selectedType === 'Credit' && styles.activeFilter]}
+            onPress={() => setSelectedType(selectedType === 'Credit' ? null : 'Credit')}
+            >
+              <Text>Credit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.filterButton, selectedType === 'Debit' && styles.activeFilter]}
+              onPress={() => setSelectedType(selectedType === 'Debit' ? null : 'Debit')}
+              >
+                <Text>Debit</Text>
+              </TouchableOpacity>
+        </View>
+    </View>
       <FlatList
-        data={sortTransactions(transactions)}
+        data={filterTransactions(sortTransactions(transactions))}
         refreshControl={
           <RefreshControl
               refreshing={refreshing}
@@ -173,7 +202,7 @@ const TransactionHistoryScreen = () => {
                         styles.valueText,
                         { color: item.type === 'Credit' ? 'green' : 'red' }
                     ]}>
-                        {authenticated ? item.amount : '****'}
+                        {authenticated ? `RM ${item.amount}` : '****'}
                     </Text>
                 </View>
                 <View style={styles.detailRow}>
@@ -262,6 +291,36 @@ const styles = StyleSheet.create({
     emptyListText: {
         fontSize: 18,
         color: '#888'
+    },
+    filterContainer: {
+      padding: 12,
+    },
+    searchInput: {
+      backgroundColor: '#fff',
+      padding: 10,
+      borderRadius: 8,
+      marginBottom: 10,
+    },
+    filterText: {
+      fontWeight: 'bold',
+      fontSize: 16,
+      color: 'white',
+      width: 120,
+      flex: 1,
+      textAlignVertical: 'center',
+    },
+    filterButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    filterButton: {
+      padding: 7,
+      backgroundColor: '#e3e3e3',
+      borderRadius: 13,
+      marginLeft: 10,
+    },
+    activeFilter: {
+      backgroundColor: '#897500',
     }
 });
 
