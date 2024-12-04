@@ -4,139 +4,139 @@
     "amount": "75.32",
     "date": "2024-01-15",
     "description": "Online Streaming Service",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "2",
     "amount": "1250.50",
     "date": "2024-01-20",
     "description": "Freelance Writing Project",
-    "type": "credit"
+    "type": "Credit"
   },
   {
     "id": "3",
     "amount": "45.99",
     "date": "2024-01-22",
     "description": "Grocery Delivery",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "4",
     "amount": "500.00",
     "date": "2024-01-25",
     "description": "Rent Payment",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "5",
     "amount": "200.75",
     "date": "2024-01-28",
     "description": "Car Maintenance",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "6",
     "amount": "1800.00",
     "date": "2024-02-01",
     "description": "Monthly Salary",
-    "type": "credit"
+    "type": "Credit"
   },
   {
     "id": "7",
     "amount": "120.50",
     "date": "2024-02-05",
     "description": "Restaurant Dinner",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "8",
     "amount": "350.25",
     "date": "2024-02-10",
     "description": "Electronics Purchase",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "9",
     "amount": "75.00",
     "date": "2024-02-15",
     "description": "Gym Membership",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "10",
     "amount": "650.00",
     "date": "2024-02-18",
     "description": "Freelance Graphic Design",
-    "type": "credit"
+    "type": "Credit"
   },
   {
     "id": "11",
     "amount": "55.40",
     "date": "2024-02-22",
     "description": "Coffee Shops",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "12",
     "amount": "180.00",
     "date": "2024-02-25",
     "description": "Online Course",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "13",
     "amount": "2500.00",
     "date": "2024-03-01",
     "description": "Quarterly Bonus",
-    "type": "credit"
+    "type": "Credit"
   },
   {
     "id": "14",
     "amount": "95.60",
     "date": "2024-03-05",
     "description": "Utility Bill",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "15",
     "amount": "450.75",
     "date": "2024-03-10",
     "description": "Home Supplies",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "16",
     "amount": "275.00",
     "date": "2024-03-15",
     "description": "Medical Consultation",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "17",
     "amount": "1000.00",
     "date": "2024-03-20",
     "description": "Investment Dividend",
-    "type": "credit"
+    "type": "Credit"
   },
   {
     "id": "18",
     "amount": "125.30",
     "date": "2024-03-25",
     "description": "Online Shopping",
-    "type": "debit"
+    "type": "Debit"
   },
   {
     "id": "19",
     "amount": "550.00",
     "date": "2024-03-28",
     "description": "Web Development Gig",
-    "type": "credit"
+    "type": "Credit"
   },
   {
     "id": "20",
     "amount": "85.75",
     "date": "2024-03-30",
     "description": "Streaming Services",
-    "type": "debit"
+    "type": "Debit"
   }
 ]

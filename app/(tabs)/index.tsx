@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Alert, useColorScheme, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Alert, useColorScheme, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation, useFocusEffect, NavigationProp } from '@react-navigation/native';
 import { RefreshControl  } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -25,21 +25,37 @@ const TransactionHistoryScreen = () => {
     const [transactions, setTransactions] = useState<Transaction[]>(transactionData);
     const router = useRouter()
 
-    const onRefresh = React.useCallback(() => {
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleError = (error: any, fallbackMessage: string) => {
+      const errorMessage = error?.message || fallbackMessage;
+      setError(errorMessage);
+      Alert.alert('Error encountered. Please restart app.');
+    };
+
+    const onRefresh = async () => {
       setRefreshing(true);
-      setTimeout(() => {
+      setError(null);
+
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
         const newTransaction = {
           id: `${Date.now()}`,
           amount: (Math.random() * 1000).toFixed(2),
           date: new Date().toISOString().split('T')[0],
           description: "New Transaction",
-          type: Math.random() > 0.5 ? "credit" : "debit"
+          type: Math.random() > 0.5 ? "Credit" : "Debit"
         };
 
         setTransactions((prev: typeof transactions) => [newTransaction, ...prev]);
+      } catch (error) {
+        handleError(error, 'Failed to refresh transactions')
+      } finally {
         setRefreshing(false);
-      }, 1500);
-    }, [transactionData]);
+      }
+    };
 
     const sortTransactions = (data: typeof transactions) => {
       return [...data].sort((a, b) => 
@@ -59,33 +75,38 @@ const TransactionHistoryScreen = () => {
     useFocusEffect(
         React.useCallback(() => {
           const authenticate = async () => {
+            setIsLoading(true);
+            setError(null);
+
             try {
               const hasHardware = await LocalAuthentication.hasHardwareAsync();
               if (!hasHardware) {
-                Alert.alert('Error', 'Your device does not support biometric authentication.');
-                return;
+                throw new Error ('Device does not support biometric authentication');
               }
     
               const isEnrolled = await LocalAuthentication.isEnrolledAsync();
               if (!isEnrolled) {
-                Alert.alert('Error', 'No biometrics are registered on this device.');
-                return;
+                throw new Error('No biometrics registered on this device');
               }
     
               const result = await LocalAuthentication.authenticateAsync({
                 promptMessage: 'Authenticate to view transactions',
+                fallbackLabel: 'Use device PIN'
               });
     
               if (result.success) {
                 setAuthenticated(true);
+              } else if (result.error === 'user cancel') {
+                handleError(null, 'Authentication cancelled');
               } else {
-                setAuthenticated(false);
-                Alert.alert('Authentication Failed', 'Unable to authenticate using Biometrics.');
+                throw new Error('Authentication failed');
               }
             } catch (error) {
-              setAuthenticated(false);
-              Alert.alert('Authentication Error', 'An error occurred while trying to authenticate.');
-            }
+                handleError(error, 'Authentication error occurred');
+                setAuthenticated(false);
+              } finally {
+                setIsLoading(false);
+              }
           };
     
           authenticate();
@@ -95,6 +116,14 @@ const TransactionHistoryScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Transaction History</Text>
+      {isLoading && (
+      <ActivityIndicator size="large" color="#fff" />
+    )}
+    {error && (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    )}
       <FlatList
         data={sortTransactions(transactions)}
         refreshControl={
@@ -110,7 +139,7 @@ const TransactionHistoryScreen = () => {
         renderItem={({ item }) => (
             <TouchableOpacity
             style={[styles.transactionItem, {
-                backgroundColor: item.type === 'credit' ? '#e3e3e3' : '#e5e7f3',
+                backgroundColor: item.type === 'Credit' ? '#e3e3e3' : '#e5e7f3',
             }]}
             onPress={() => router.push({
               pathname: "/TransactionDetail",
@@ -142,7 +171,7 @@ const TransactionHistoryScreen = () => {
                     <Text style={styles.labelText}>Amount: </Text>
                     <Text style={[
                         styles.valueText,
-                        { color: item.type === 'credit' ? 'green' : 'red' }
+                        { color: item.type === 'Credit' ? 'green' : 'red' }
                     ]}>
                         {authenticated ? item.amount : '****'}
                     </Text>
@@ -174,13 +203,26 @@ const styles = StyleSheet.create({
         paddingTop: 10,
         marginTop: 40,
     },
+
+    errorContainer: {
+      padding: 16,
+      backgroundColor: '#ffebee',
+      marginHorizontal: 12,
+      borderRadius: 8,
+      marginBottom: 8
+    },
+
+    errorText: {
+      color: '#d32f2f',
+      textAlign: 'center'
+    },
+
     header: {
       fontSize: 24,
       fontWeight: 'bold',
       color: '#fff',
       padding: 16,
       textAlign: 'center',
-      
       
     },
     transactionItem: {

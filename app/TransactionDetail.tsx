@@ -55,7 +55,7 @@ const TransactionDetail = () => {
           <Text style={styles.label}>Amount:</Text>
           <Text style={[
             styles.value,
-            { color: transaction.type === 'credit' ? 'green' : 'red' }
+            { color: transaction.type === 'Credit' ? 'green' : 'red' }
           ]}>
             {transaction.amount}
           </Text>
