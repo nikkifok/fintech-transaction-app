@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, useColorScheme, TouchableOpacity } from 'react-native';
 import { useNavigation, useFocusEffect, NavigationProp } from '@react-navigation/native';
+import { RefreshControl  } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import transactions from '@/assets/transactions.json';
 
@@ -11,10 +12,25 @@ type RootStackParamList = {
 
 const TransactionHistoryScreen = () => {
     const [authenticated, setAuthenticated] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [transactionData, setTransactionData] = useState(transactions);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const colorScheme = useColorScheme();
-    const textColor = colorScheme === 'dark' ? '#FFFFFF' : '#000000';
 
+    const onRefresh = React.useCallback(() => {
+      setRefreshing(true);
+      setTimeout(() => {
+        const newTransaction = {
+          id: `${transactionData.length + 1}`,
+          amount: (Math.random() * 1000).toFixed(2),
+          date: new Date().toISOString().split('T')[0],
+          description: "New Transaction",
+          type: Math.random() > 0.5 ? "credit" : "debit"
+        };
+
+        setTransactionData(prev => [newTransaction, ...prev]);
+        setRefreshing(false);
+      }, 1500);
+    }, [transactionData]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -55,7 +71,16 @@ const TransactionHistoryScreen = () => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={transactions}
+        data={transactionData}
+        refreshControl={
+          <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#fff"
+              titleColor="#fff"
+            />
+        }
+
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
             <TouchableOpacity
