@@ -88,6 +88,13 @@ const TransactionHistoryScreen = () => {
                         {authenticated ? item.amount : '****'}
                     </Text>
                 </View>
+                <View style={styles.detailRow}>
+                    <Text style={styles.labelText}>Type: </Text>
+                    <Text style={[
+                        styles.valueText, { color: '#08204d'}]}>
+                        {item.type}
+                    </Text>
+                </View>
             </View>
           </TouchableOpacity>
         )}
@@ -109,7 +116,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
     },
     transactionItem: {
-        padding: 22,
+        padding: 15,
         marginVertical: 8,
         marginHorizontal: 12,
         borderRadius: 8,
