@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, useColorScheme, TouchableOpacity } from 'react-native';
 import { useNavigation, useFocusEffect, NavigationProp } from '@react-navigation/native';
 import { RefreshControl  } from 'react-native';
+import { useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
 import transactionData from '@/assets/transactions.json';
 
@@ -22,7 +23,7 @@ const TransactionHistoryScreen = () => {
     const [authenticated, setAuthenticated] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [transactions, setTransactions] = useState<Transaction[]>(transactionData);
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const router = useRouter()
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
@@ -109,9 +110,18 @@ const TransactionHistoryScreen = () => {
         renderItem={({ item }) => (
             <TouchableOpacity
             style={[styles.transactionItem, {
-                backgroundColor: item.type === 'credit' ? '#e6f3e6' : '#f3e6e6',
+                backgroundColor: item.type === 'credit' ? '#e3e3e3' : '#e5e7f3',
             }]}
-            onPress={() => navigation.navigate('TransactionDetail', { transaction: item })}
+            onPress={() => router.push({
+              pathname: "/TransactionDetail",
+              params: { 
+                id: item.id,
+                amount: item.amount,
+                date: item.date,
+                description: item.description,
+                type: item.type
+              }
+            })}
           >
             <View style={styles.transactionDetails}>
                 <View style={styles.detailRow}>
@@ -160,7 +170,7 @@ const TransactionHistoryScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#063970',
+        backgroundColor: '#001489',
         paddingTop: 10,
         marginTop: 40,
     },
@@ -169,7 +179,9 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       color: '#fff',
       padding: 16,
-      textAlign: 'center'
+      textAlign: 'center',
+      
+      
     },
     transactionItem: {
         padding: 15,
