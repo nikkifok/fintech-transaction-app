@@ -3,34 +3,57 @@ import { View, Text, FlatList, StyleSheet, Alert, useColorScheme, TouchableOpaci
 import { useNavigation, useFocusEffect, NavigationProp } from '@react-navigation/native';
 import { RefreshControl  } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
-import transactions from '@/assets/transactions.json';
+import transactionData from '@/assets/transactions.json';
+
+type Transaction = {
+  id: string;
+  amount: string;
+  date: string;
+  description: string;
+  type: string;
+};
 
 type RootStackParamList = {
     TransactionHistory: undefined;
-    TransactionDetail: { transaction: { id: string; amount: string; date: string; description: string; type: string; } };
+    TransactionDetail: { transaction: Transaction };
 };
 
 const TransactionHistoryScreen = () => {
     const [authenticated, setAuthenticated] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [transactionData, setTransactionData] = useState(transactions);
+    const [transactions, setTransactions] = useState<Transaction[]>(transactionData);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
       setTimeout(() => {
         const newTransaction = {
-          id: `${transactionData.length + 1}`,
+          id: `${Date.now()}`,
           amount: (Math.random() * 1000).toFixed(2),
           date: new Date().toISOString().split('T')[0],
           description: "New Transaction",
           type: Math.random() > 0.5 ? "credit" : "debit"
         };
 
-        setTransactionData(prev => [newTransaction, ...prev]);
+        setTransactions((prev: typeof transactions) => [newTransaction, ...prev]);
         setRefreshing(false);
       }, 1500);
     }, [transactionData]);
+
+    const sortTransactions = (data: typeof transactions) => {
+      return [...data].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+    };
+
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    };
 
     useFocusEffect(
         React.useCallback(() => {
@@ -70,8 +93,9 @@ const TransactionHistoryScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>Transaction History</Text>
       <FlatList
-        data={transactionData}
+        data={sortTransactions(transactions)}
         refreshControl={
           <RefreshControl
               refreshing={refreshing}
@@ -93,7 +117,7 @@ const TransactionHistoryScreen = () => {
                 <View style={styles.detailRow}>
                     <Text style={styles.labelText}>Date: </Text>
                     <Text style={[styles.valueText, { color: '#08204d' }]}>
-                        {item.date}
+                        {formatDate(item.date)}
                     </Text>
                 </View>
 
@@ -139,6 +163,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#063970',
         paddingTop: 10,
         marginTop: 40,
+    },
+    header: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#fff',
+      padding: 16,
+      textAlign: 'center'
     },
     transactionItem: {
         padding: 15,
