@@ -52,6 +52,19 @@ In the output, you'll find options to open the app in a
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
+## :camera_flash: Screenshots
+### Biometrics Authentication Screen
+<img src="./screenshots/YTLS_01AuthScreen.jpeg" width="300" alt="Biometrics Authentication Screen">
+
+### Transaction History Screen
+<img src="./screenshots/YTLS_02TransactionHistScreen.jpeg" width="300" alt="Transaction History Screen">
+
+### Transaction Details Screen
+<img src="./screenshots/YTLS_03TransactionDetailsScreen.jpeg" width="300" alt="Transaction Details Screen">
+
+### Authentication Error Handled Screen
+<img src="./screenshots/YTLS_04AuthErrorScreen.jpeg" width="300" alt="Authentication Error Handled Screen">
+
 
 ## Explore Expo
 - [Expo on GitHub](https://github.com/expo/expo): View open source platform and contribute.
